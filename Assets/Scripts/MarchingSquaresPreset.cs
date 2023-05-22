@@ -11,6 +11,7 @@ public class MarchingSquaresPreset : ScriptableObject
     public float isoValue = 0.3f;
     [Range(1f, 8f)]
     public int subdivision = 1;
+    public float borderHeight = 1f;
     [HideInInspector]
     public UnityEvent onChanged;
 

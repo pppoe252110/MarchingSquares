@@ -13,11 +13,12 @@ MonoBehaviour:
   m_Name: Preset1
   m_EditorClassIdentifier: 
   gridSize:
-    x: 64
-    y: 64
+    x: 32
+    y: 32
   noiseSize: 0.03
-  isoValue: 0.421
+  isoValue: 0.325
   subdivision: 1
+  borderHeight: 1
   onChanged:
     m_PersistentCalls:
       m_Calls: []

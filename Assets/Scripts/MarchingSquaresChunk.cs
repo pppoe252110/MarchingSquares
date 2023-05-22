@@ -7,7 +7,8 @@ using UnityEngine;
 public class MarchingSquaresChunk : MonoBehaviour
 {
     public Dictionary<int2, float> noiseMap;
-    private List<Vector3> verticies;
+    private List<Vector3> squareVerticies;
+    private List<Vector3> borderVerticies;
     private List<int> triangles;
     private Mesh mesh;
     private List<Vector2> uvs;
@@ -18,7 +19,7 @@ public class MarchingSquaresChunk : MonoBehaviour
     {
         mesh = new Mesh();
         mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
-        mesh.SetVertices(verticies);
+        mesh.SetVertices(squareVerticies);
         mesh.SetTriangles(triangles, 0);
         mesh.RecalculateNormals();
         mesh.SetUVs(0, uvs);
@@ -31,12 +32,12 @@ public class MarchingSquaresChunk : MonoBehaviour
         subdivision = preset.subdivision;
 
         noiseMap = new Dictionary<int2, float>();
-        verticies = new List<Vector3>();
+        squareVerticies = new List<Vector3>();
         triangles = new List<int>();
         uvs = new List<Vector2>();
 
         GenerateNoise(preset.gridSize * preset.subdivision, preset.noiseSize, offset);
-        GenerateMeshData(preset.gridSize * preset.subdivision, preset.isoValue);
+        GenerateMeshData(preset.gridSize * preset.subdivision, preset.isoValue, preset.borderHeight);
         GenerateMesh();
         //Debug.Log("Successfully generated | " + (Time.realtimeSinceStartup - startTime));
     }
@@ -61,7 +62,7 @@ public class MarchingSquaresChunk : MonoBehaviour
         }
     }
 
-    public void GenerateMeshData(int2 gridSize, float isoValue)
+    public void GenerateMeshData(int2 gridSize, float isoValue, float borderHeight)
     {
         for (int x = 0; x < gridSize.x; x++)
         {
@@ -85,9 +86,103 @@ public class MarchingSquaresChunk : MonoBehaviour
                     config = 0;
                 }
                 GenrateMeshVariation(new int2(x, y), config);
+                GenerateBorder(new int2(x, y), config, borderHeight);
 
             }
         }
+    }
+
+    public void GenerateBorder(int2 position, int config, float borderHeight)
+    {
+        switch (config)
+        {
+            //corners
+            case 1:
+                WallFromPoints(position, borderHeight, NodePositions.centreLeft, NodePositions.centreBottom);
+                break;
+            case 2:
+                WallFromPoints(position, borderHeight, NodePositions.centreBottom, NodePositions.centreRight);
+                break;
+            case 4:
+                WallFromPoints(position, borderHeight, NodePositions.centreRight, NodePositions.centreTop);
+                break;
+            case 8:
+                WallFromPoints(position, borderHeight, NodePositions.centreTop, NodePositions.centreLeft);
+                break;
+            //sides
+            case 3:
+                WallFromPoints(position, borderHeight, NodePositions.centreLeft, NodePositions.centreRight);
+                break;
+            case 6:
+                WallFromPoints(position, borderHeight, NodePositions.centreBottom, NodePositions.centreTop);
+                break;
+            case 9:
+                WallFromPoints(position, borderHeight, NodePositions.centreTop, NodePositions.centreBottom);
+                break;
+            case 12:
+                WallFromPoints(position, borderHeight, NodePositions.centreRight, NodePositions.centreLeft);
+                break;
+            //double corners
+            case 5:
+                WallFromPoints(position, borderHeight, NodePositions.centreLeft, NodePositions.centreTop, NodePositions.centreRight, NodePositions.centreBottom);
+                break;
+            case 10:
+                WallFromPoints(position, borderHeight, NodePositions.centreTop, NodePositions.centreRight, NodePositions.centreBottom, NodePositions.centreLeft);
+                break;
+            //cut corners
+            case 7:
+                WallFromPoints(position, borderHeight, NodePositions.centreLeft, NodePositions.centreTop);
+                break;
+            case 11:
+                WallFromPoints(position, borderHeight, NodePositions.centreTop, NodePositions.centreRight);
+                break;
+            case 13:
+                WallFromPoints(position, borderHeight, NodePositions.centreRight, NodePositions.centreBottom);
+                break;
+            case 14:
+                WallFromPoints(position, borderHeight, NodePositions.centreBottom, NodePositions.centreLeft);
+                break;
+
+        }
+    }
+
+    public void WallFromPoints(int2 position, float borderHeight, params float2[] points)
+    {
+        var arr = new List<float3>();
+        for (int i = 0; i < points.Length; i++)
+        {
+            arr.Add(new float3(points[i].x, 0, points[i].y));
+            arr.Add(new float3(points[i].x, borderHeight, points[i].y));
+        }
+        AddWall(position, arr);
+    }
+
+    public void AddWall(int2 position, List<float3> points)
+    {
+        if (points.Count > 0)
+        {
+            CreateWallTriangle(position, points[0], points[1], points[3]);
+            CreateWallTriangle(position, points[0], points[3], points[2]);
+        }
+        if (points.Count > 4)
+        {
+            CreateWallTriangle(position, points[4], points[5], points[7]);
+            CreateWallTriangle(position, points[4], points[7], points[6]);
+        }
+    }
+
+    public void CreateWallTriangle(int2 position, float3 a, float3 b, float3 c)
+    {
+        var posA = new Vector3((a.x + position.x) / ((float)subdivision), a.y, (a.z + position.y) / ((float)subdivision));
+        var posB = new Vector3((b.x + position.x) / ((float)subdivision), b.y, (b.z + position.y) / ((float)subdivision));
+        var posC = new Vector3((c.x + position.x) / ((float)subdivision), c.y, (c.z + position.y) / ((float)subdivision));
+
+        Debug.Log(a+" "+b+" "+c);
+
+        AddVerticies(posA, posB, posC);
+        AddUVs(new Vector2(posA.x, posA.y), new Vector2(posB.x, posB.y), new Vector2(posC.x, posC.y));
+        AddTriangles(3);
+
     }
 
     public void GenrateMeshVariation(int2 position, int config)
@@ -188,9 +283,9 @@ public class MarchingSquaresChunk : MonoBehaviour
 
     private void AddVerticies(Vector3 a, Vector3 b, Vector3 c)
     {
-        verticies.Add(a);
-        verticies.Add(b);
-        verticies.Add(c);
+        squareVerticies.Add(a);
+        squareVerticies.Add(b);
+        squareVerticies.Add(c);
     }
 
     private void AddUVs(Vector2 a, Vector2 b, Vector2 c)
