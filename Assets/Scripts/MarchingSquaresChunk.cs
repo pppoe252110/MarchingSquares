@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using Unity.Mathematics;
+using Unity.VisualScripting;
 using UnityEngine;
 
 [RequireComponent(typeof(MeshFilter))]
@@ -8,12 +10,10 @@ public class MarchingSquaresChunk : MonoBehaviour
 {
     public Dictionary<int2, float> noiseMap;
     private List<Vector3> squareVerticies;
-    private List<Vector3> borderVerticies;
     private List<int> triangles;
     private Mesh mesh;
     private List<Vector2> uvs;
     private int subdivision;
-
 
     public void GenerateMesh()
     {
@@ -177,12 +177,44 @@ public class MarchingSquaresChunk : MonoBehaviour
         var posB = new Vector3((b.x + position.x) / ((float)subdivision), b.y, (b.z + position.y) / ((float)subdivision));
         var posC = new Vector3((c.x + position.x) / ((float)subdivision), c.y, (c.z + position.y) / ((float)subdivision));
 
-        Debug.Log(a+" "+b+" "+c);
-
         AddVerticies(posA, posB, posC);
-        AddUVs(new Vector2(posA.x, posA.y), new Vector2(posB.x, posB.y), new Vector2(posC.x, posC.y));
+
+        var cross = GetCross(posA, posB, posC);
+        float crA = Vector3.SignedAngle(Vector3.forward, cross, Vector3.up);
+
+        float t = (crA + 180) / 360;
+        var pA = ThiSFMagic(t, posA);
+        var pB = ThiSFMagic(t, posB);
+        var pC = ThiSFMagic(t, posC);
+
+        AddUVs(
+            new Vector2(pA, posA.y),
+            new Vector2(pB, posB.y), 
+            new Vector2(pC, posC.y));
+        //AddUVs(new Vector2(posA.x, posA.y), new Vector2(posB.x, posB.y), new Vector2(posC.x, posC.y));
         AddTriangles(3);
 
+    }
+
+    public float ThiSFMagic(float a, Vector3 point)
+    {
+        return Multilerp.MultilerpFunction(a,
+            point.x,
+            (point.z - point.x) * Mathf.Sqrt(2f) / 2f,
+            point.z,
+            (point.z + point.x) * Mathf.Sqrt(2f) / 2f,
+            point.x,
+            (point.z - point.x) * Mathf.Sqrt(2f) / 2f,
+            point.z,
+            (point.z + point.x) * Mathf.Sqrt(2f) / 2f,
+            point.x);
+    }
+
+    public Vector3 GetCross(Vector3 a, Vector3 b, Vector3 c)
+    {
+        var dir = Vector3.Cross(b - a, c - a);
+        var norm = Vector3.Normalize(dir);
+        return norm;
     }
 
     public void GenrateMeshVariation(int2 position, int config)

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -15,6 +16,17 @@ public class MarchingSquaresGenerator : MonoBehaviour
         preset.onChanged.AddListener(() => GenerateChanks());
     }
 
+    [UnityEditor.Callbacks.DidReloadScripts]
+    private static void OnScriptsReloaded()
+    {
+        var a = FindObjectOfType<MarchingSquaresGenerator>();
+        var b = FindObjectsOfType<MarchingSquaresChunk>();
+        foreach (var chunk in b)
+        {
+            a.chunks.Add(int2.zero, chunk);
+        }
+        a.preset.onChanged.AddListener(() => a.GenerateChanks());
+    }
 
     public void GenerateChanks()
     {
