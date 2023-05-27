@@ -16,23 +16,36 @@ public class MarchingSquaresGenerator : MonoBehaviour
         preset.onChanged.AddListener(() => GenerateChanks());
     }
 
+    private void OnValidate()
+    {
+        if (!Application.isPlaying)
+            return;
+        GenerateChanks();
+    }
+
     [UnityEditor.Callbacks.DidReloadScripts]
     private static void OnScriptsReloaded()
     {
+        if (!Application.isPlaying)
+            return;
         var a = FindObjectOfType<MarchingSquaresGenerator>();
         var b = FindObjectsOfType<MarchingSquaresChunk>();
         foreach (var chunk in b)
         {
             a.chunks.Add(int2.zero, chunk);
         }
-        a.preset.onChanged.AddListener(() => a.GenerateChanks());
+        a.preset?.onChanged?.AddListener(() => a.GenerateChanks());
     }
 
     public void GenerateChanks()
     {
+        if (!Application.isPlaying)
+            return;
+
         foreach (var item in chunks.Values)
         {
-            Destroy(item.gameObject);
+            if(item)
+                Destroy(item.gameObject);
         }
         chunks = new Dictionary<int2, MarchingSquaresChunk>();
         for (int x = 0; x < size.x; x++)
@@ -41,6 +54,8 @@ public class MarchingSquaresGenerator : MonoBehaviour
             {
                 var chunk = Instantiate(chunkPrefab);
                 chunk.transform.position = new Vector3(x * preset.gridSize.x, 0, y * preset.gridSize.y);
+                chunk.SetMaxSize(size.x, size.y);
+                chunk.SetCoordinates(x, y);
                 chunk.Generate(preset, new Vector2(x * preset.gridSize.x, y * preset.gridSize.y));
                 chunks.Add(new int2(x, y), chunk);
             }
