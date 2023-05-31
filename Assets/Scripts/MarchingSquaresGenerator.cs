@@ -32,7 +32,9 @@ public class MarchingSquaresGenerator : MonoBehaviour
         var b = FindObjectsOfType<MarchingSquaresChunk>();
         foreach (var chunk in b)
         {
-            a.chunks.Add(int2.zero, chunk);
+            var pos = new int2((int)(chunk.transform.position.x / a.preset.gridSize.x / a.size.x), (int)(chunk.transform.position.z / a.preset.gridSize.y / a.size.y));
+            if (!a.chunks.ContainsValue(chunk) && !a.chunks.ContainsKey(pos))
+                a.chunks.Add(pos, chunk);
         }
         a.preset?.onChanged?.AddListener(() => a.GenerateChanks());
     }

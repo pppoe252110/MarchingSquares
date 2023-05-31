@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Runtime.CompilerServices;
 using Unity.Mathematics;
 using Unity.VisualScripting;
@@ -11,12 +12,17 @@ using UnityEngine;
 public class MarchingSquaresChunk : MonoBehaviour
 {
     public Dictionary<int2, float> noiseMap;
+
     private List<Vector3> squareVerticies;
     private List<int> triangles;
-    private Mesh mesh;
     private List<Vector2> uvs;
+    private Mesh mesh;
+    private MeshFilter meshFilter;
+
     private int2 coordinates;
     private int2 maxSize;
+    [HideInInspector]
+
     private MarchingSquaresPreset preset;
 
     public void GenerateMesh()
@@ -27,7 +33,9 @@ public class MarchingSquaresChunk : MonoBehaviour
         mesh.SetTriangles(triangles, 0);
         mesh.RecalculateNormals();
         mesh.SetUVs(0, uvs);
-        GetComponent<MeshFilter>().mesh = mesh;
+        if(!meshFilter)
+            meshFilter = GetComponent<MeshFilter>();
+        meshFilter.mesh = mesh;
     }
 
     public void SetCoordinates(int x, int y)
@@ -61,26 +69,26 @@ public class MarchingSquaresChunk : MonoBehaviour
         {
             for (int y = 0; y < preset.gridSize.y * preset.subdivision + 1; y++)
             {
-                float noise = 0;
+                float noiseValue = 0;
                 if (preset.isoValue < 1)
                 {
-                    noise = Mathf.PerlinNoise(
-                        (x * preset.noiseSize) / preset.subdivision + offset.x * preset.noiseSize,
-                        (y * preset.noiseSize) / preset.subdivision + offset.y * preset.noiseSize);
-                    noise = Mathf.Clamp01(noise);
+                    noiseValue = noise.cnoise(new float2(
+                        (x * preset.noiseSize) / preset.subdivision + offset.x * preset.noiseSize + preset.seed,
+                        (y * preset.noiseSize) / preset.subdivision + offset.y * preset.noiseSize) + preset.seed);
+                    noiseValue = Mathf.Clamp01(noiseValue * preset.noiseGain + preset.noiseOffset);
                 }
                 else if (preset.isoValue <= 0)
                 {
-                    noise = 1;
+                    noiseValue = 1;
                 }
                 if (preset.generateFalloff)
                 {
                     var falloff = preset.falloffCurve.Evaluate(Vector2.Distance(
                         new Vector2(x + coordinates.x * preset.gridSize.x * preset.subdivision, y + coordinates.y * preset.gridSize.y * preset.subdivision),
                         center) / div);
-                    noise *= falloff * preset.falloffMultiplier;
+                    noiseValue *= falloff * preset.falloffMultiplier;
                 }
-                noiseMap.Add(new int2(x, y), noise);
+                noiseMap.Add(new int2(x, y), noiseValue);
             }
         }
     }
@@ -109,6 +117,7 @@ public class MarchingSquaresChunk : MonoBehaviour
                 //    config = 0;
                 //}
                 GenrateMeshVariation(new int2(x, y), config);
+                if(preset.generateBorder)
                 GenerateBorder(new int2(x, y), config, preset.borderHeight);
 
             }
@@ -318,6 +327,22 @@ public class MarchingSquaresChunk : MonoBehaviour
             CreateTriangle(position, points[0], points[4], points[5]);
     }
 
+    private float2 InterpolateVertical(float2 point, float2 point1, float data, float data1)
+    {
+        float qX = point.x;
+        float qY = point.y + (point1.y - point.y) * ((1f - data) / (data1 - data));
+        float2 q = new float2(qX, qY);
+        return q;
+    }
+
+
+    private float2 InterpolateHorizonal(float2 start, float2 end, float startForce, float endForce)
+    {
+        float pX = start.x + (end.x - start.x) * ((1f - startForce) / (endForce - startForce));
+        float pY = start.y;
+        float2 p = new float2(pX, pY);
+        return p;
+    }
 
     void CreateTriangle(int2 position, float2 a, float2 b, float2 c)
     {

@@ -12,15 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2ff8f38fc53106d4099ff07152517e00, type: 3}
   m_Name: PresetTest
   m_EditorClassIdentifier: 
+  seed: 1901
   gridSize:
     x: 64
     y: 64
-  noiseSize: 0.05
-  isoValue: 0.431
-  subdivision: 2
+  noiseGain: 0.6
+  noiseOffset: 0.26
+  noiseSize: 0.02
+  isoValue: 0.112
+  subdivision: 1
+  generateBorder: 1
   borderHeight: -10
   generateFalloff: 1
-  falloffMultiplier: 3.55
+  falloffMultiplier: 1
   falloffRadius: 1
   falloffCurve:
     serializedVersion: 2
@@ -28,17 +32,44 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 0
       value: 1
-      inSlope: -1
-      outSlope: -1
+      inSlope: -0.014260385
+      outSlope: -0.014260385
       tangentMode: 34
       weightedMode: 0
       inWeight: 0
       outWeight: 0.33333334
     - serializedVersion: 3
+      time: 0.32314375
+      value: 0.99539185
+      inSlope: -0.053575523
+      outSlope: -0.053575523
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.45429495
+    - serializedVersion: 3
+      time: 0.51106554
+      value: 0.7511522
+      inSlope: -2.7279534
+      outSlope: -2.7279534
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.1903821
+      outWeight: 0.17272694
+    - serializedVersion: 3
+      time: 0.8521021
+      value: 0.38470072
+      inSlope: -1.8378232
+      outSlope: -1.8378232
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
       time: 1
       value: 0
-      inSlope: -1
-      outSlope: -1
+      inSlope: -2.6011236
+      outSlope: -2.6011236
       tangentMode: 34
       weightedMode: 0
       inWeight: 0.33333334

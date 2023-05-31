@@ -477,3 +477,4 @@ MonoBehaviour:
   size:
     x: 4
     y: 4
+  fastNoise: {fileID: 11400000, guid: 3ba8a066d5ab7b441b6a945ff175748d, type: 2}

@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4769e140e33119d42aff1561d9dd7ca1, type: 3}
+  m_Name: Data
+  m_EditorClassIdentifier: 
+  noiseName: Default Noise
+  seed: 1337
+  frequency: 0.01
+  interp: 2
+  noiseType: 4
+  octaves: 3
+  lacunarity: 2
+  gain: 0.5
+  fractalType: 0
+  cellularDistanceFunction: 0
+  cellularReturnType: 0
+  cellularNoiseLookup: {fileID: 0}
+  cellularDistanceIndex0: 0
+  cellularDistanceIndex1: 1
+  cellularJitter: 0.45
+  gradientPerturbAmp: 1
+  generalSettingsFold: 1
+  fractalSettingsFold: 0
+  cellularSettingsFold: 0
+  positionWarpSettingsFold: 0
