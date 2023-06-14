@@ -10,21 +10,21 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2ff8f38fc53106d4099ff07152517e00, type: 3}
-  m_Name: PresetTest
+  m_Name: Endless
   m_EditorClassIdentifier: 
-  seed: 1901
+  seed: 2238
   gridSize:
     x: 64
     y: 64
-  noiseGain: 0.6
-  noiseOffset: 0.26
+  noiseGain: 0.85
+  noiseOffset: 0.15
   noiseSize: 0.02
-  isoValue: 0.112
-  subdivision: 1
+  isoValue: 0.538
+  subdivision: 2
   generateBorder: 1
   borderHeight: -10
-  generateFalloff: 1
-  falloffMultiplier: 1
+  generateFalloff: 0
+  falloffMultiplier: 0.89
   falloffRadius: 1
   falloffCurve:
     serializedVersion: 2
